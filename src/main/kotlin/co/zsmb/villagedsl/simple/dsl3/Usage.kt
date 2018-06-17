@@ -2,6 +2,7 @@ package co.zsmb.villagedsl.simple.dsl3
 
 fun main(args: Array<String>) {
 
+    val forty = 40
     val v = village containing houses {
 
         house with people {
@@ -18,7 +19,7 @@ fun main(args: Array<String>) {
         house without people
 
         house with people {
-            "Sarah" age 40
+            "Sarah" age forty
             "Tom" age 26
             "Holly" age 52
         }
