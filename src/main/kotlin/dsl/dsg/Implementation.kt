@@ -1,11 +1,5 @@
 package dsl.dsg
 
-import dsl.dsg.model.Config
-import dsl.dsg.model.DataSource
-import dsl.dsg.model.DataSourceGroup
-import javax.script.ScriptEngine
-import javax.script.ScriptEngineManager
-
 // imports para suportar JSR 223. Veja exemplo listado abaixo:
 // https://github.com/JetBrains/kotlin/blob/master/libraries/examples/kotlin-jsr223-local-example/src/test/kotlin/org/jetbrains/kotlin/script/jsr223/KotlinJsr223ScriptEngineIT.kt
 
@@ -17,8 +11,12 @@ import javax.script.ScriptEngineManager
 // import org.jetbrains.kotlin.config.KotlinCompilerVersion
 // import org.jetbrains.kotlin.daemon.common.threadCpuTime
 // import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
-import java.lang.management.ManagementFactory
+import dsl.dsg.model.Config
+import dsl.dsg.model.DataSource
+import dsl.dsg.model.DataSourceGroup
+import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
+import javax.script.ScriptEngineManager
 
 fun debugScriptEngine(factory: ScriptEngineFactory) {
     factory.apply {
@@ -38,7 +36,53 @@ fun debugScriptEngine(factory: ScriptEngineFactory) {
 }
 
 object dataSourceGroup {
-    infix fun containing(dataSources: List<DataSource>) = DataSourceGroup(dataSources)
+
+    var currentDataSourceGroup: DataSourceGroup? = null
+    var rules: String = ""
+    var firstIndex: Int = 0
+    var queue: Int = 0
+    var dataSourceType: Int = 0
+
+    infix fun containing(dataSources: List<DataSource>) = createDataSourceGroup(dataSources)
+
+    infix fun rules(r: String): dataSourceGroup {
+        dataSourceGroup.rules = r
+        return this
+    }
+
+    // Guardando os atributos index, queue, dataSourceType para propagar nos objetos DataSource
+    infix fun firstIndex(fi: Int): dataSourceGroup {
+        dataSourceGroup.firstIndex = fi
+        return this
+    }
+
+    infix fun queue(q: Int): dataSourceGroup {
+        dataSourceGroup.queue = q
+        return this
+    }
+
+    infix fun dataSourceType(t: Int): dataSourceGroup {
+        dataSourceGroup.dataSourceType = t
+        return this
+    }
+
+    // TODO: guardar os atributos item, measurementUnit, term e info para propagar nos objetos DataSource via método merge()
+
+    operator fun invoke(): dataSourceGroup = merge()
+
+    fun createDataSourceGroup(dataSources: List<DataSource>): dataSourceGroup {
+        currentDataSourceGroup = DataSourceGroup(dataSources)
+        println("DEBUG: currentDataSourceGroup = " + currentDataSourceGroup)
+        println("DEBUG: merge invocado. rules = $rules, firstIndex = $firstIndex, queue = $queue, dataSourceType = $dataSourceType")
+        return dataSourceGroup
+    }
+
+    fun merge(): dataSourceGroup {
+        println("DEBUG: merge invocado. rules = $rules, firstIndex = $firstIndex, queue = $queue, dataSourceType = $dataSourceType")
+        // TODO: ajustar os atributos index, queue, dataSourceType, item, measurementUnit, term e info nos respectivos DataSource
+        return dataSourceGroup
+    }
+
 }
 
 object dataSource
@@ -62,7 +106,6 @@ fun configs(actions: ConfigListBuilder.() -> Unit): List<Config> {
 fun config(actions: ConfigListBuilder.() -> Unit) = configs(actions)
 
 class DataSourceListBuilder {
-
     private var currentDataSource: DataSource? = null
     private val dataSources = mutableListOf<DataSource>()
 
@@ -90,7 +133,7 @@ class DataSourceListBuilder {
             println("Atenção: houve um erro quando tentava-se carregar a Kotlin Script Engine")
             currentDataSource!!.description = desc
             // Ver https://stackoverflow.com/questions/44781462/kotlin-jsr-223-scriptenginefactory-within-the-fat-jar-cannot-find-kotlin-compi
-            
+
         } else {
             val factory = engine.factory
             debugScriptEngine(factory)
@@ -112,6 +155,7 @@ class DataSourceListBuilder {
     //    infix fun dataSource.without(c: configs) {
     //        dataSources += DataSource("")
     //    }
+
 
 }
 
