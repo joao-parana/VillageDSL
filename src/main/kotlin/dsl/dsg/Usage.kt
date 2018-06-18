@@ -13,5 +13,7 @@ fun main(args: Array<String>) {
         dataSource  name "zz" title "title zz " desc "desc \${IT}.name"
     }
 
-    print(dsg)
+    println("************************************************")
+    println(dsg)
+    println("************************************************")
 }

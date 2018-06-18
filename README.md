@@ -1,5 +1,17 @@
 # Village DSL [![Build Status](https://travis-ci.org/zsmb13/VillageDSL.svg?branch=master)](https://travis-ci.org/zsmb13/VillageDSL)
 
+# Build project
+
+```bash
+git clone git@github.com:joao-parana/VillageDSL
+cd VillageDSL
+export VILLAGE_DSL_APP_HOME=$PWD
+./gradlew clean build -q
+java -cp /usr/local/kotlinc/lib/kotlin-runtime.jar:build/libs/village-dsl-1.0-SNAPSHOT.jar dsl.dsg.UsageKt$main$dsg$1$1
+```
+
+
+
 This repository contains samples of various Kotlin DSL designs. It consists of two main exercises: a simple and an advanced model, and it offers various DSL solutions for constructing structures within these models. Both models aim to simulate a fantasy game of some sorts where you have to describe a village and its contents.
 
 # The simple model
