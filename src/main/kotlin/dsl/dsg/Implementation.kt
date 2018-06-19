@@ -18,6 +18,12 @@ import dsl.dsg.model.Rule
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
+import kotlin.annotation.AnnotationRetention.RUNTIME
+
+
+//@Target(LOCAL_VARIABLE)
+@Retention(RUNTIME)
+annotation class DSLBuilder(val desc: String)
 
 fun debugScriptEngine(factory: ScriptEngineFactory) {
     factory.apply {
@@ -125,6 +131,7 @@ object dataSourceGroup {
             | dataSourceType = $dataSourceType, item = $item, measurementUnit = $measurementUnit,
             | terms = $terms e info = $info """.trimMargin("|"))
         // TODO: ajustar os atributos index, queue, dataSourceType, item, measurementUnit, terms e info nos respectivos DataSource
+
         return dataSourceGroup
     }
 
@@ -132,12 +139,19 @@ object dataSourceGroup {
 
 object dataSource
 
+@DSLBuilder("dsl.dsg.model.Config")
 class ConfigListBuilder {
     val configs = mutableListOf<Config>()
 
     fun build(): List<Config> = configs
 
     infix fun Int.conf(configuration: String) {
+        val annotations = ConfigListBuilder::class.annotations
+        if (!annotations.isEmpty()) {
+            println("\n••• annotations =" + annotations.toString())
+            val scriptable = annotations.first() as DSLBuilder
+            println("\n••• description of Scriptable annotation: ${scriptable.desc}")
+        }
         configs.add(Config(this, configuration))
     }
 }
@@ -150,6 +164,7 @@ fun configs(actions: ConfigListBuilder.() -> Unit): List<Config> {
 
 fun config(actions: ConfigListBuilder.() -> Unit) = configs(actions)
 
+@DSLBuilder("dsl.dsg.model.DataSource")
 class DataSourceListBuilder {
     private var currentDataSource: DataSource? = null
     private val dataSources = mutableListOf<DataSource>()
@@ -199,6 +214,7 @@ fun dataSources(actions: DataSourceListBuilder.() -> Unit): List<DataSource> {
 
 object rule
 
+@DSLBuilder("dsl.dsg.model.Rule")
 class RuleListBuilder {
     private var currentRule: Rule? = null
     private val rules = mutableListOf<Rule>()

@@ -4,10 +4,11 @@ import se.KotlinScriptEngineFactory
 
 fun main(args: Array<String>) {
     KotlinScriptEngineFactory()
-    val piTagConfig = 1001
+    @DSLBuilder("kotlin.Int") val piTagConfig = 1001
     val temperatura = 301
     val UAM02_PXI_2_T08_C_All = 1248
 
+    @DSLBuilder("dsl.dsg.DataSourceGroup")
     val dsg = dataSourceGroup setup "\${enable(IT.debug)}" firstIndex 5 queue UAM02_PXI_2_T08_C_All dsType temperatura item 319 containing dataSources {
         dataSource name "xx" title "title xx " desc "\"config\".capitalize()" with config {
             piTagConfig conf "{tagName:'STH     .MEDICAO NIVEL JUSANTE HJ2 (U18) LM-04           '}"
