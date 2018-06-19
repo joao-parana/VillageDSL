@@ -7,7 +7,9 @@ data class DataSource(val name:String,
                       var description: String = "",
                       val index: Int = -1, val  queue: Int = -1,  val dataSourceType: Int = -1,
                       val item: Int = -1, val measurementUnit: Int = -1, val info:String = "",
-                      val term: List<Int>? = null,
+                      val terms: List<Int>? = null,
                       var configs: List<Config>? = null)
 
-data class DataSourceGroup(val dataSorces: List<DataSource>, var rules:String = "")
+data class DataSourceGroup(val dataSorces: List<DataSource>, var rules:String = "", var debug:Boolean = false)
+
+data class Rule(val code:String, var title: String = "")

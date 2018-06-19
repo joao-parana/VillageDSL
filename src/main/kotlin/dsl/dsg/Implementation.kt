@@ -14,6 +14,7 @@ package dsl.dsg
 import dsl.dsg.model.Config
 import dsl.dsg.model.DataSource
 import dsl.dsg.model.DataSourceGroup
+import dsl.dsg.model.Rule
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
 import javax.script.ScriptEngineManager
@@ -35,18 +36,28 @@ fun debugScriptEngine(factory: ScriptEngineFactory) {
     }
 }
 
+// var currentDataSourceGroup: dataSourceGroup? = null
+
 object dataSourceGroup {
 
+    var currentRuleList: List<Rule>? = null
     var currentDataSourceGroup: DataSourceGroup? = null
-    var rules: String = ""
+    var setup: String = ""
     var firstIndex: Int = 0
     var queue: Int = 0
+    var item: Int = 0
+    var measurementUnit: Int = 0
+    var terms: List<Int>? = null
+    var info: String = ""
     var dataSourceType: Int = 0
+    var rules = mutableListOf<Rule>()
 
     infix fun containing(dataSources: List<DataSource>) = createDataSourceGroup(dataSources)
 
-    infix fun rules(r: String): dataSourceGroup {
-        dataSourceGroup.rules = r
+    infix fun using(rules: List<Rule>) = createRuleList(rules)
+
+    infix fun setup(r: String): dataSourceGroup {
+        dataSourceGroup.setup = r
         return this
     }
 
@@ -61,25 +72,50 @@ object dataSourceGroup {
         return this
     }
 
-    infix fun dataSourceType(t: Int): dataSourceGroup {
+    infix fun dsType(t: Int): dataSourceGroup {
         dataSourceGroup.dataSourceType = t
         return this
     }
 
-    // TODO: guardar os atributos item, measurementUnit, term e info para propagar nos objetos DataSource via método merge()
+    infix fun item(t: Int): dataSourceGroup {
+        dataSourceGroup.item = t
+        return this
+    }
+    infix fun measurementUnit(m: Int): dataSourceGroup {
+        dataSourceGroup.measurementUnit = m
+        return this
+    }
 
+    infix fun terms(t: List<Int>): dataSourceGroup {
+        dataSourceGroup.terms = t
+        return this
+    }
+    infix fun info(i: String): dataSourceGroup {
+        dataSourceGroup.info = i
+        return this
+    }
     operator fun invoke(): dataSourceGroup = merge()
 
     fun createDataSourceGroup(dataSources: List<DataSource>): dataSourceGroup {
         currentDataSourceGroup = DataSourceGroup(dataSources)
+        currentDataSourceGroup
         println("DEBUG: currentDataSourceGroup = " + currentDataSourceGroup)
-        println("DEBUG: merge invocado. rules = $rules, firstIndex = $firstIndex, queue = $queue, dataSourceType = $dataSourceType")
+        println("""DEBUG: createDataSourceGroup invocado. setup = $setup, firstIndex = $firstIndex, queue = $queue,
+            | dataSourceType = $dataSourceType, item = $item, measurementUnit = $measurementUnit,
+            | terms = $terms e info = $info """.trimMargin("|"))
+        return dataSourceGroup
+    }
+
+    fun createRuleList(rules: List<Rule>): dataSourceGroup {
+        currentRuleList = rules
         return dataSourceGroup
     }
 
     fun merge(): dataSourceGroup {
-        println("DEBUG: merge invocado. rules = $rules, firstIndex = $firstIndex, queue = $queue, dataSourceType = $dataSourceType")
-        // TODO: ajustar os atributos index, queue, dataSourceType, item, measurementUnit, term e info nos respectivos DataSource
+        println("""DEBUG: merge invocado. setup = $setup, firstIndex = $firstIndex, queue = $queue,
+            | dataSourceType = $dataSourceType, item = $item, measurementUnit = $measurementUnit,
+            | terms = $terms e info = $info """.trimMargin("|"))
+        // TODO: ajustar os atributos index, queue, dataSourceType, item, measurementUnit, terms e info nos respectivos DataSource
         return dataSourceGroup
     }
 
@@ -151,16 +187,37 @@ class DataSourceListBuilder {
 
     infix fun dataSource.of(configs: List<Config>) = with(configs)
 
-    //    @Suppress("UNUSED_PARAMETER")
-    //    infix fun dataSource.without(c: configs) {
-    //        dataSources += DataSource("")
-    //    }
-
-
 }
 
 fun dataSources(actions: DataSourceListBuilder.() -> Unit): List<DataSource> {
     val builder = DataSourceListBuilder()
+    builder.actions()
+    return builder.build()
+}
+
+object rule
+
+class RuleListBuilder {
+    private var currentRule: Rule? = null
+    private val rules = mutableListOf<Rule>()
+
+    fun build(): List<Rule> = rules
+
+    infix fun rule.code(code: String): rule {
+        currentRule = Rule(code)
+        rules += currentRule!!
+        dataSourceGroup.rules = rules
+        return rule
+    }
+
+    infix fun rule.title(t: String): rule {
+        currentRule!!.title = t
+        return rule
+    }
+}
+
+fun rules(actions: RuleListBuilder.() -> Unit): List<Rule> {
+    val builder = RuleListBuilder()
     builder.actions()
     return builder.build()
 }
