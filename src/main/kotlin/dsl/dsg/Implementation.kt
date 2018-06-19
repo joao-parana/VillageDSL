@@ -15,9 +15,9 @@ import dsl.dsg.model.Config
 import dsl.dsg.model.DataSource
 import dsl.dsg.model.DataSourceGroup
 import dsl.dsg.model.Rule
+import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
-import javax.script.ScriptEngineManager
 
 fun debugScriptEngine(factory: ScriptEngineFactory) {
     factory.apply {
@@ -36,10 +36,16 @@ fun debugScriptEngine(factory: ScriptEngineFactory) {
     }
 }
 
+object dslSingleton {
+    val jsr223factory = KotlinJsr223JvmLocalScriptEngineFactory()
+    val engine = jsr223factory.scriptEngine
+    val dummy1 = Class.forName("org.jetbrains.kotlin.cli.jvm.repl.GenericReplCompiler")
+    val dummy2 = engine.eval("println(\"config\".capitalize().substring(0,5))")
+}
+
 // var currentDataSourceGroup: dataSourceGroup? = null
-
 object dataSourceGroup {
-
+    val engine = dslSingleton.engine
     var currentRuleList: List<Rule>? = null
     var currentDataSourceGroup: DataSourceGroup? = null
     var setup: String = ""
@@ -81,6 +87,7 @@ object dataSourceGroup {
         dataSourceGroup.item = t
         return this
     }
+
     infix fun measurementUnit(m: Int): dataSourceGroup {
         dataSourceGroup.measurementUnit = m
         return this
@@ -90,10 +97,12 @@ object dataSourceGroup {
         dataSourceGroup.terms = t
         return this
     }
+
     infix fun info(i: String): dataSourceGroup {
         dataSourceGroup.info = i
         return this
     }
+
     operator fun invoke(): dataSourceGroup = merge()
 
     fun createDataSourceGroup(dataSources: List<DataSource>): dataSourceGroup {
@@ -163,21 +172,14 @@ class DataSourceListBuilder {
         // Atenção: é necessário carregar a implemntação Kotlin da JSR 223. Veja o build.gradle.kts abaixo
         // https://github.com/JetBrains/kotlin/blob/master/libraries/examples/kotlin-jsr223-local-example/build.gradle.kts
         var IT = currentDataSource
-        val engine: ScriptEngine? = ScriptEngineManager().getEngineByExtension("kts")
+        //val engine: ScriptEngine? = ScriptEngineManager().getEngineByExtension("kts")
+        val jsr223factory = KotlinJsr223JvmLocalScriptEngineFactory()
+        // TODO: mover este código pro método merge do objeto dataSourceGroup pois só lá é que odos os atributos estarão resolvidos.
+        // TODO: usar javax.script.Bindings
+        println(desc)
+        val result = dslSingleton.engine.eval(desc)
+        currentDataSource!!.description = result as String
 
-        if (engine == null) {
-            println("Atenção: houve um erro quando tentava-se carregar a Kotlin Script Engine")
-            currentDataSource!!.description = desc
-            // Ver https://stackoverflow.com/questions/44781462/kotlin-jsr-223-scriptenginefactory-within-the-fat-jar-cannot-find-kotlin-compi
-
-        } else {
-            val factory = engine.factory
-            debugScriptEngine(factory)
-            val result = engine.eval(desc)
-            //val res = engine.eval("x + 2")
-            //Assert.assertEquals(5, res)
-            currentDataSource!!.description = result as String
-        }
         return dataSource
     }
 

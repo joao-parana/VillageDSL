@@ -2,10 +2,11 @@ group 'co.zsmb'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.2.50'
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -18,15 +19,18 @@ apply from: 'testformatter.gradle'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    // compile "org.jetbrains.kotlin:kotlin-scripting-compiler:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-scripting-compiler:1.2.50"
+    compile "org.jetbrains.kotlin:kotlin-compiler-client-embeddable:1.2.50"
+    compile "org.jetbrains.kotlin:kotlin-compiler:1.2.50"
+    compile "org.jetbrains.kotlin:kotlin-script-util:1.2.50" // Thanks for using https://jar-download.com
+    compile "com.tinder:state-machine:0.0.1"
 }
-
-
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
