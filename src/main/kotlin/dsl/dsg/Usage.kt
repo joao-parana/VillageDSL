@@ -15,12 +15,12 @@ fun main(args: Array<String>) {
           item name "Itaipu" title "Itaipu Binacional" desc plantDescription term "4301" contains {
             item name "Itaipu - Paraguay" title "Itaipu - 50Hz" desc "Usina de Itaipu Lado Paraguai" term "4301" contains {
               item name "U01" title "U01" desc "Unidad Generadora-U01" term "4302" contains {
-                item name "UAM01" title "UAM 01" desc "Unidade de Aquisição e Monitoramento da -U01 _ Controladora NI PXI-1"  term "4304" contains {}
-                item name "U01_Generador" title "Generador" desc "Generador de la Unidad Generadora-U01" term "4307" contains {}
-                item name "U01_Turbina" title "Turbina" desc "Turbina de la Unidad Generadora-U01" term "4307" contains {}
+                item name "UAM01" title "UAM 01" desc "Unidade de Aquisição e Monitoramento da -U01 _ Controladora NI PXI-1"  term "4304"
+                item name "U01_Generador" title "Generador" desc "Generador de la Unidad Generadora-U01" term "4307"
+                item name "U01_Turbina" title "Turbina" desc "Turbina de la Unidad Generadora-U01" term "4307"
               }
               item name "U02" title "U02" desc "Unidad Generadora-U02" term "4302" contains {
-                item name "UAM02" title "UAM 02" desc "Unidade de Aquisição e Monitoramento da -U02 _ Controladora NI PXI-1" term "4304" contains {}
+                item name "UAM02" title "UAM 02" desc "Unidade de Aquisição e Monitoramento da -U02 _ Controladora NI PXI-1" term "4304"
               }
             }
           }

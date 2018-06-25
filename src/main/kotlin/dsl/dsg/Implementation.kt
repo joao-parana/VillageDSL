@@ -13,13 +13,10 @@ package dsl.dsg
 // import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import dsl.dsg.model.*
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
+import java.util.*
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import java.util.ArrayDeque
-import java.util.Deque
-
-
 
 
 //@Target(LOCAL_VARIABLE)
@@ -51,7 +48,16 @@ object dslSingleton {
     var installationInfos = mutableListOf<InstallationInfo>()
     @Deprecated("usar Stack em vez")
     var itens = mutableListOf<Item>()
+    var previusItem: Item? = null
     var stackOfItens: Deque<MutableList<Item>> = ArrayDeque()
+
+    fun stackSummary(): String {
+        val sb = StringBuilder()
+        for (il in dslSingleton.stackOfItens) {
+            sb.append("\"${il[0].name}\" ")
+        }
+        return sb.toString()
+    }
 }
 
 // var currentDataSourceGroup: dataSourceGroup? = null
@@ -263,7 +269,7 @@ class InstallationInfoListBuilder {
 
     fun build(): List<InstallationInfo> = installationInfos
 
-    infix fun installationInfo.project(projectName : String): installationInfo {
+    infix fun installationInfo.project(projectName: String): installationInfo {
         currentInstallationInfo = InstallationInfo(projectName)
         installationInfos += currentInstallationInfo!!
         dslSingleton.installationInfos = installationInfos
