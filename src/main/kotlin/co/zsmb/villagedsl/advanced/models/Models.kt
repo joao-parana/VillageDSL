@@ -4,9 +4,9 @@ data class Village(val houses: List<House>)
 
 data class House(val people: List<Person>, val items: List<Item>)
 
-data class Person(val name: String, val age: Int)
-
 interface Item
+
+data class Person(val name: String, val age: Int): Item
 
 data class Gold(val amount: Int) : Item
 

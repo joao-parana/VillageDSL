@@ -11,14 +11,15 @@ package dsl.dsg
 // import org.jetbrains.kotlin.config.KotlinCompilerVersion
 // import org.jetbrains.kotlin.daemon.common.threadCpuTime
 // import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
-import dsl.dsg.model.Config
-import dsl.dsg.model.DataSource
-import dsl.dsg.model.DataSourceGroup
-import dsl.dsg.model.Rule
+import dsl.dsg.model.*
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
 import kotlin.annotation.AnnotationRetention.RUNTIME
+import java.util.ArrayDeque
+import java.util.Deque
+
+
 
 
 //@Target(LOCAL_VARIABLE)
@@ -47,6 +48,10 @@ object dslSingleton {
     val engine = jsr223factory.scriptEngine
     val dummy1 = Class.forName("org.jetbrains.kotlin.cli.jvm.repl.GenericReplCompiler")
     val dummy2 = engine.eval("println(\"config\".capitalize().substring(0,5))")
+    var installationInfos = mutableListOf<InstallationInfo>()
+    @Deprecated("usar Stack em vez")
+    var itens = mutableListOf<Item>()
+    var stackOfItens: Deque<MutableList<Item>> = ArrayDeque()
 }
 
 // var currentDataSourceGroup: dataSourceGroup? = null
@@ -239,3 +244,62 @@ fun rules(actions: RuleListBuilder.() -> Unit): List<Rule> {
     builder.actions()
     return builder.build()
 }
+
+// implementando a DSL para installationInfo
+
+object installationInfo
+
+//
+//fun installationInfo(actions: InstallationInfoListBuilder.() -> Unit): List<InstallationInfo> {
+//    val builder = RuleListBuilder()
+//    builder.actions()
+//    return builder.build()
+//}
+
+@DSLBuilder("dsl.dsg.model.InstallationInfo")
+class InstallationInfoListBuilder {
+    private var currentInstallationInfo: InstallationInfo? = null
+    private val installationInfos = mutableListOf<InstallationInfo>()
+
+    fun build(): List<InstallationInfo> = installationInfos
+
+    infix fun installationInfo.project(projectName : String): installationInfo {
+        currentInstallationInfo = InstallationInfo(projectName)
+        installationInfos += currentInstallationInfo!!
+        dslSingleton.installationInfos = installationInfos
+        return installationInfo
+    }
+
+    infix fun installationInfo.title(t: String): installationInfo {
+        currentInstallationInfo!!.projectTitle = t
+        return installationInfo
+    }
+
+    infix fun installationInfo.server(t: String): installationInfo {
+        currentInstallationInfo!!.instanceName = t
+        return installationInfo
+    }
+
+    infix fun installationInfo.serverTitle(t: String): installationInfo {
+        currentInstallationInfo!!.instanceTitle = t
+        return installationInfo
+    }
+
+    infix fun installationInfo.locale(t: String): installationInfo {
+        currentInstallationInfo!!.locale = t
+        return installationInfo
+    }
+}
+
+fun elements(actions: InstallationInfoListBuilder.() -> Unit): List<InstallationInfo> {
+    val builder = InstallationInfoListBuilder()
+    builder.actions()
+    return builder.build()
+}
+
+// items {
+//    item name "Itaipu" title "Itaipu Binacional" desc plantDescription term "4301" {
+// ...
+//    }
+
+
