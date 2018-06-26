@@ -18,6 +18,20 @@ import javax.script.ScriptEngine
 import javax.script.ScriptEngineFactory
 import kotlin.annotation.AnnotationRetention.RUNTIME
 
+/**
+ * Builds new string by populating newly created [StringBuilder] initialized with the given [capacity]
+ * using provided [builderAction] and then converting it to [String].
+ */
+public inline fun buildMyString(capacity: Int, builderAction: StringBuilder.() -> Unit): String =
+        StringBuilder(capacity).apply(builderAction).toString()
+
+/**
+ * Builds new string by populating newly created [StringBuilder] initialized with the given [capacity]
+ * using provided [builderAction] and then converting it to [String].
+ */
+public inline fun buildMyString(builderAction: StringBuilder.() -> Unit): String =
+        StringBuilder(64).apply(builderAction).toString()
+
 
 //@Target(LOCAL_VARIABLE)
 @Retention(RUNTIME)
@@ -51,13 +65,22 @@ object dslSingleton {
     var previusItem: Item? = null
     var stackOfItens: Deque<MutableList<Item>> = ArrayDeque()
 
-    fun stackSummary(): String {
-        val sb = StringBuilder()
-        for (il in dslSingleton.stackOfItens) {
-            sb.append("\"${il[0].name}\" ")
+    fun stackExtSummary(): String {
+        // pode usar alternativamente o método buildString de StringBuffer.
+        // A diferença é que o buffer aqui começa com 64 bytes
+        return buildMyString {
+            for (il in dslSingleton.stackOfItens) {
+                append("\"${il[0].name}\" ")
+            }
         }
-        return sb.toString()
     }
+
+    fun stackSummary(): String = buildMyString {
+        for (il in dslSingleton.stackOfItens) {
+            append("\"${il[0].name}\" ")
+        }
+    }
+
 }
 
 // var currentDataSourceGroup: dataSourceGroup? = null
